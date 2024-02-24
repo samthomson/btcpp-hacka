@@ -211,6 +211,7 @@ const App = () => {
 
 					<textarea style={{ width: '100%', height: '60px' }} value={generatedInvoice} disabled={true} />
 
+					<p>length: {!!generatedInvoice && generatedInvoice?.length > 20 ? generatedInvoice.length : '?'}</p>
 
 					<p>
 						Broadcast mode:
@@ -235,15 +236,14 @@ const App = () => {
 						</label>
 					</p>
 
-					<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}>broadcast ⚡</button>
+					<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}><h3>broadcast ⚡</h3></button>
 				</div>
-				<p>length: {generatedInvoice?.length}</p>
 			</>}
 
 
 			{!uiIsBroadcastMode && <>
 				<h3>Convert Thunder (&#127785;👂) to Lightning (&#9889;)</h3>
-				<button onClick={registerListener} disabled={isListening}>{!isListening ? 'Listen for something' : 'Listening...'}</button><br />
+				<button onClick={registerListener} disabled={isListening}><h3>👂{!isListening ? 'Listen for something' : 'Listening...'}</h3></button><br />
 
 				{isListening && <>
 
