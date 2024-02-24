@@ -27,12 +27,12 @@ const App = () => {
         quietProfiles.audible,
       ).init();
 
-      quietInstance.receive(({value}: {value: string}) => {
-        console.log(value)
-        // if (isListening) {
-          setHeardContent((prevHeardContent) => prevHeardContent + value);
-        // }
-      });
+      // quietInstance.receive(({value}: {value: string}) => {
+      //   console.log(value)
+      //   // if (isListening) {
+      //     setHeardContent((prevHeardContent) => prevHeardContent + value);
+      //   // }
+      // });
 
       setQuiet(quietInstance)
     }
@@ -42,14 +42,14 @@ const App = () => {
     setUpQuiet()
   }, [])
 
-  const toggleListening = () => {
-    if (isListening) {
-      setIsListening(false)
-    } else {
-      setHeardContent('')
-      setIsListening(true)
-    }
-  }
+  // const toggleListening = () => {
+  //   if (isListening) {
+  //     setIsListening(false)
+  //   } else {
+  //     setHeardContent('')
+  //     setIsListening(true)
+  //   }
+  // }
   
 
   const splitStringIntoVariableChunks = (str: string, minChunkLength: number, maxChunkLength: number): string[] => {
@@ -105,6 +105,28 @@ const App = () => {
     }
   }
 
+
+  const registerListener = () => {
+    setHeardContent('')
+    if (!!quiet) {
+      // @ts-ignore
+      quiet.receive(({value}: {value: string}) => {
+        console.log(value)
+        // if (isListening) {
+          setHeardContent((prevHeardContent) => prevHeardContent + value);
+        // }
+      });
+    }
+  }
+
+  const tryToParseInvoice = async () => {
+
+    // @ts-ignore
+    const paymentAttempt = await window.webln.sendPayment(heardContent);
+
+    console.log('payment attempt', paymentAttempt)
+  }
+
   return (
     <div>
      [todo: build app]
@@ -114,12 +136,16 @@ const App = () => {
       <p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>{generatedInvoice}</p>
       <p>length: {generatedInvoice?.length}</p>
      <hr/>
-     <button onClick={toggleListening}>{String(isListening)}</button><br/>
+     {/* <button onClick={toggleListening}>{String(isListening)}</button><br/> */}
+     <button onClick={registerListener}>Listen for something</button><br/>
+
+     
      <p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>
      {heardContent}</p>
       <p>length: {heardContent?.length}</p>
      <hr />
      {generatedInvoice === heardContent ? 'MATCH' : 'NOT THE SAME'}
+     <button onClick={tryToParseInvoice}>try to pay</button>
     </div>
   );
 }
