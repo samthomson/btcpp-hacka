@@ -31,13 +31,6 @@ const App = () => {
 				quietProfiles.audible,
 			).init();
 
-			// quietInstance.receive(({value}: {value: string}) => {
-			//   console.log(value)
-			//   // if (isListening) {
-			//     setHeardContent((prevHeardContent) => prevHeardContent + value);
-			//   // }
-			// });
-
 			setQuiet(quietInstance)
 		}
 	}
@@ -52,14 +45,27 @@ const App = () => {
 		setUpQuiet()
 	}, [])
 
-	// const toggleListening = () => {
-	//   if (isListening) {
-	//     setIsListening(false)
-	//   } else {
-	//     setHeardContent('')
-	//     setIsListening(true)
-	//   }
-	// }
+	const generateInvoice = async () => {
+		console.log('hook firing', { amount, receiveAddress })
+		if (amount > 0 && !!receiveAddress) {
+			setGeneratedInvoice('.. loading ...')
+			const ln = new ALbyLightningTools.LightningAddress(receiveAddress);
+			await ln.fetch();
+
+			const invoice = await ln.requestInvoice({ satoshi: amount });
+
+			// console.log(invoice.paymentRequest);
+			// console.log(invoice.paymentHash); 
+
+			const invoiceString = invoice.paymentRequest
+			setGeneratedInvoice(invoiceString)
+		}
+	}
+
+	React.useEffect(() => {
+		generateInvoice()
+	}, [amount, receiveAddress])
+
 
 
 	const splitStringIntoVariableChunks = (str: string, minChunkLength: number, maxChunkLength: number): string[] => {
@@ -75,21 +81,18 @@ const App = () => {
 	}
 
 
-	const makeInvoice = async () => {
-		if (window.webln) {
+	const broadcastInvoice = async () => {
+		if (window.webln && !!generatedInvoice) {
 
-			const ln = new ALbyLightningTools.LightningAddress(receiveAddress);
-			await ln.fetch();
+			// const ln = new ALbyLightningTools.LightningAddress(receiveAddress);
+			// await ln.fetch();
 
-			const invoice = await ln.requestInvoice({ satoshi: amount });
-
-			console.log(invoice.paymentRequest); // print the payment request
-			console.log(invoice.paymentHash); // print the payment hash
+			// const invoice = await ln.requestInvoice({ satoshi: amount });
 
 			// this must be in the event, the previous stuff can be re-used
 			if (quiet) {
-				const invoiceString = invoice.paymentRequest
-				setGeneratedInvoice(invoiceString)
+				// const invoiceString = invoice.paymentRequest
+				// setGeneratedInvoice(invoiceString)
 
 
 
@@ -98,10 +101,10 @@ const App = () => {
 					quiet.transmit({
 						clampFrame: false,
 						// clampFrame: true,
-						payload: invoiceString,
+						payload: generatedInvoice,
 					});
 				} else if (broadcastMode === 'batch') {
-					const chunks = splitStringIntoVariableChunks(invoiceString, 3, 24)
+					const chunks = splitStringIntoVariableChunks(generatedInvoice, 3, 24)
 
 					for (let i = 0; i < chunks.length; i++) {
 						// @ts-ignore
@@ -186,6 +189,9 @@ const App = () => {
 					onChange={(e) => setAmount(Number(e.target.value))}
 				/><br /><br />
 
+				<textarea style={{ width: '100%', height: '60px' }} value={generatedInvoice} disabled={true} />
+
+
 				<p>
 					Broadcast mode:
 					<label>
@@ -208,9 +214,8 @@ const App = () => {
 						Batch
 					</label>
 				</p>
-				<textarea style={{ width: '100%' }} value={generatedInvoice} />
 
-				<button onClick={makeInvoice}>broadcast ⚡</button>
+				<button onClick={broadcastInvoice}>broadcast ⚡</button>
 			</div>
 			<p>length: {generatedInvoice?.length}</p>
 			<hr />
