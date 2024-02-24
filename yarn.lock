@@ -1629,6 +1629,11 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
+"@moxon6/quiet-js@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@moxon6/quiet-js/-/quiet-js-0.0.9.tgz#47d819f071b54f0eeb912df0a6085a89bf032b32"
+  integrity sha512-yQyyIdkw1efykn2G1uOrLDOdxNKoDPpz0kRYhoBT60tFrkgpF7Nk1QThlX+Tzmvt3oxpsOdxKW6NKORVy4r2Lw==
+
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"
   resolved "https://registry.yarnpkg.com/@nicolo-ribaudo/eslint-scope-5-internals/-/eslint-scope-5-internals-5.1.1-v1.tgz#dbf733a965ca47b1973177dc0bb6c889edcfb129"
