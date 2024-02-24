@@ -22,6 +22,8 @@ const App = () => {
 	const [heardContent, setHeardContent] = React.useState<string>('')
 	const [isListening, setIsListening] = React.useState<boolean>(false)
 
+	const [parsedInvoice, setParsedInvoice] = React.useState<ALbyLightningTools.Invoice | undefined>(undefined)
+
 
 	const setUpQuiet = async () => {
 		if (quiet === undefined) {
@@ -147,15 +149,16 @@ const App = () => {
 		const invoice = (() => {
 			try {
 				const invoice = new ALbyLightningTools.Invoice({ pr: heardContent });
-				return invoice
+				// return invoice
+				setParsedInvoice(invoice)
 			} catch (e) {
 				// don't care about the error
-				console.log('silent error')
-				return undefined
+				console.log('silent error parsing invoice')
+				// return undefined
 			}
 		})()
 
-		console.log('invoice amount: ', invoice?.satoshi)
+		// console.log('invoice amount: ', invoice?.satoshi)
 	}
 
 
@@ -172,7 +175,7 @@ const App = () => {
 		<div>
 			<h2>Lightning / thunder</h2>
 
-			<h3>Convert Lightning (&#9889;) &rarr; thunder (&#128227;&#127785;)</h3>
+			<h3>Convert Lightning (&#9889;) &rarr; thunder (&#127785;&nbsp;<span style={{ display: 'inline-block', transform: "scaleX(-1)" }}>&#128227;</span>)</h3>
 			<div>
 				receive to:&nbsp;&nbsp;&nbsp;&nbsp;
 				<input
@@ -215,7 +218,7 @@ const App = () => {
 					</label>
 				</p>
 
-				<button onClick={broadcastInvoice}>broadcast ⚡</button>
+				<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}>broadcast ⚡</button>
 			</div>
 			<p>length: {generatedInvoice?.length}</p>
 			<hr />
@@ -226,11 +229,12 @@ const App = () => {
 			<button onClick={registerListener}>Listen for something</button><br />
 
 
-			<p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>
-				{heardContent}</p>
+			<textarea style={{ width: '100%', height: '60px', overflowY: 'auto' }} value={heardContent} disabled={true} />
+			{/* <p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>
+				{heardContent}</p> */}
 			<p>length: {heardContent?.length}</p>
-			<button onClick={tryToParseInvoice}>try to decode</button><br />
-			<button onClick={tryToPayInvoice}>try to pay</button>
+			<button onClick={tryToParseInvoice}>decode</button><br />
+			<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>pay {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
 		</div>
 	);
 }
