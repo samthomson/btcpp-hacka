@@ -16,7 +16,7 @@ const App = () => {
 	const [uiIsBroadcastMode, setUIIsBroadcastMode] = React.useState(true)
 
 	const [amount, setAmount] = React.useState<number>(0);
-	const [receiveAddress, setReceiveAddress] = React.useState<string>('sam@lawallet.ar');
+	const [receiveAddress, setReceiveAddress] = React.useState<string>(''); //sam@lawallet.ar
 
 	const [generatedInvoice, setGeneratedInvoice] = React.useState<string>()
 
@@ -236,7 +236,7 @@ const App = () => {
 						</label>
 					</p>
 
-					<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}><h3>broadcast ⚡</h3></button>
+					<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}><h3>broadcast <span style={{ display: 'inline-block', transform: "scaleX(-1)" }}>&#128227;</span></h3></button>
 				</div>
 			</>}
 
@@ -252,7 +252,7 @@ const App = () => {
 					<p>
 						<button onClick={tryToParseInvoice} disabled={isDecoding || heardContent?.length === 0 || !!parsedInvoice}>{isDecoding ? 'decoding ...' : 'decode'}</button>
 					</p>
-					<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>pay {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
+					<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>⚡ {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
 				</>}
 			</>}
 		</div>
