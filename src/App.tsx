@@ -21,7 +21,9 @@ const App = () => {
 	const [broadcastMode, setBroadcastMode] = React.useState<'single' | 'batch'>('single');
 	const [heardContent, setHeardContent] = React.useState<string>('')
 	const [isListening, setIsListening] = React.useState<boolean>(false)
+	const [isDecoding, setIsDecoding] = React.useState<boolean>(false)
 
+	const timeoutRef = React.useRef<NodeJS.Timeout | number | null>(null);
 	const [parsedInvoice, setParsedInvoice] = React.useState<ALbyLightningTools.Invoice | undefined>(undefined)
 
 
@@ -131,35 +133,45 @@ const App = () => {
 
 	const registerListener = () => {
 		setHeardContent('')
+
 		if (!!quiet) {
 			// @ts-ignore
 			quiet.receive(({ value }: { value: string }) => {
 				console.log(value)
-				// if (isListening) {
 				setHeardContent((prevHeardContent) => prevHeardContent + value);
-				tryToParseInvoice()
-				// }
 			});
+			setIsListening(true)
 			console.log('listener registered')
 		}
 	}
 
-	const tryToParseInvoice = () => {
-
-		const invoice = (() => {
-			try {
-				const invoice = new ALbyLightningTools.Invoice({ pr: heardContent });
-				// return invoice
-				setParsedInvoice(invoice)
-			} catch (e) {
-				// don't care about the error
-				console.log('silent error parsing invoice')
-				// return undefined
+	React.useEffect(() => {
+		if (heardContent?.length > 0) {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
 			}
-		})()
+			timeoutRef.current = setTimeout(() => {
+				tryToParseInvoice();
+			}, 300);
+		}
+	}, [heardContent])
 
-		// console.log('invoice amount: ', invoice?.satoshi)
-	}
+	const tryToParseInvoice = React.useCallback(() => {
+		console.log('tryToParseInvoice', heardContent.length)
+		setIsDecoding(true)
+
+		try {
+			const invoice = new ALbyLightningTools.Invoice({ pr: heardContent });
+			// return invoice
+			setParsedInvoice(invoice)
+			setIsDecoding(false)
+		} catch (e) {
+			// don't care about the error
+			console.log('silent error parsing invoice')
+			// return undefined
+			setIsDecoding(false)
+		}
+	}, [heardContent])
 
 
 
@@ -225,16 +237,17 @@ const App = () => {
 
 
 			<h3>Convert Thunder (&#127785;👂) to Lightning (&#9889;)</h3>
-			{/* <button onClick={toggleListening}>{String(isListening)}</button><br/> */}
-			<button onClick={registerListener}>Listen for something</button><br />
+			<button onClick={registerListener} disabled={isListening}>{!isListening ? 'Listen for something' : 'Listening...'}</button><br />
 
+			{isListening && <>
 
-			<textarea style={{ width: '100%', height: '60px', overflowY: 'auto' }} value={heardContent} disabled={true} />
-			{/* <p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>
-				{heardContent}</p> */}
-			<p>length: {heardContent?.length}</p>
-			<button onClick={tryToParseInvoice}>decode</button><br />
-			<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>pay {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
+				<textarea style={{ width: '100%', height: '60px', overflowY: 'auto' }} value={heardContent} disabled={true} />
+				<p>length: {heardContent?.length}</p>
+				<p>
+					<button onClick={tryToParseInvoice} disabled={isDecoding || heardContent?.length === 0 || !!parsedInvoice}>{isDecoding ? 'decoding ...' : 'decode'}</button>
+				</p>
+				<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>pay {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
+			</>}
 		</div>
 	);
 }
