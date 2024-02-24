@@ -13,6 +13,8 @@ const App = () => {
 
 	const [quiet, setQuiet] = React.useState(undefined)
 
+	const [uiIsBroadcastMode, setUIIsBroadcastMode] = React.useState(true)
+
 	const [amount, setAmount] = React.useState<number>(0);
 	const [receiveAddress, setReceiveAddress] = React.useState<string>('sam@lawallet.ar');
 
@@ -186,67 +188,72 @@ const App = () => {
 	return (
 		<div>
 			<h2>Lightning / thunder</h2>
-
-			<h3>Convert Lightning (&#9889;) &rarr; thunder (&#127785;&nbsp;<span style={{ display: 'inline-block', transform: "scaleX(-1)" }}>&#128227;</span>)</h3>
-			<div>
-				receive to:&nbsp;&nbsp;&nbsp;&nbsp;
-				<input
-					type="text"
-					placeholder="My address"
-					value={receiveAddress}
-					onChange={(e) => setReceiveAddress(e.target.value)}
-				/><br /><br />
-				sat amount:&nbsp;&nbsp;
-				<input
-					type="number"
-					placeholder="Amount"
-					value={amount}
-					onChange={(e) => setAmount(Number(e.target.value))}
-				/><br /><br />
-
-				<textarea style={{ width: '100%', height: '60px' }} value={generatedInvoice} disabled={true} />
-
-
-				<p>
-					Broadcast mode:
-					<label>
-						<input
-							type="radio"
-							value="single"
-							checked={broadcastMode === 'single'}
-							onChange={(e) => setBroadcastMode('single')}
-						/>
-						Single
-					</label>
-					&nbsp;&nbsp;
-					<label>
-						<input
-							type="radio"
-							value="batch"
-							checked={broadcastMode === 'batch'}
-							onChange={(e) => setBroadcastMode('batch')}
-						/>
-						Batch
-					</label>
-				</p>
-
-				<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}>broadcast ⚡</button>
-			</div>
-			<p>length: {generatedInvoice?.length}</p>
 			<hr />
+			<button disabled={uiIsBroadcastMode} onClick={() => setUIIsBroadcastMode(true)}>BROADCAST</button>&nbsp;-&nbsp;OR&nbsp;-&nbsp;&nbsp;&nbsp;<button disabled={!uiIsBroadcastMode} onClick={() => setUIIsBroadcastMode(false)}>LISTEN</button>
+			<hr />
+			{uiIsBroadcastMode && <>
+				<h3>Convert Lightning (&#9889;) &rarr; thunder (&#127785;&nbsp;<span style={{ display: 'inline-block', transform: "scaleX(-1)" }}>&#128227;</span>)</h3>
+				<div>
+					receive to:&nbsp;&nbsp;&nbsp;&nbsp;
+					<input
+						type="text"
+						placeholder="My address"
+						value={receiveAddress}
+						onChange={(e) => setReceiveAddress(e.target.value)}
+					/><br /><br />
+					sat amount:&nbsp;&nbsp;
+					<input
+						type="number"
+						placeholder="Amount"
+						value={amount}
+						onChange={(e) => setAmount(Number(e.target.value))}
+					/><br /><br />
+
+					<textarea style={{ width: '100%', height: '60px' }} value={generatedInvoice} disabled={true} />
 
 
-			<h3>Convert Thunder (&#127785;👂) to Lightning (&#9889;)</h3>
-			<button onClick={registerListener} disabled={isListening}>{!isListening ? 'Listen for something' : 'Listening...'}</button><br />
+					<p>
+						Broadcast mode:
+						<label>
+							<input
+								type="radio"
+								value="single"
+								checked={broadcastMode === 'single'}
+								onChange={(e) => setBroadcastMode('single')}
+							/>
+							Single
+						</label>
+						&nbsp;&nbsp;
+						<label>
+							<input
+								type="radio"
+								value="batch"
+								checked={broadcastMode === 'batch'}
+								onChange={(e) => setBroadcastMode('batch')}
+							/>
+							Batch
+						</label>
+					</p>
 
-			{isListening && <>
+					<button onClick={broadcastInvoice} disabled={!generatedInvoice || generatedInvoice.length < 20}>broadcast ⚡</button>
+				</div>
+				<p>length: {generatedInvoice?.length}</p>
+			</>}
 
-				<textarea style={{ width: '100%', height: '60px', overflowY: 'auto' }} value={heardContent} disabled={true} />
-				<p>length: {heardContent?.length}</p>
-				<p>
-					<button onClick={tryToParseInvoice} disabled={isDecoding || heardContent?.length === 0 || !!parsedInvoice}>{isDecoding ? 'decoding ...' : 'decode'}</button>
-				</p>
-				<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>pay {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
+
+			{!uiIsBroadcastMode && <>
+				<h3>Convert Thunder (&#127785;👂) to Lightning (&#9889;)</h3>
+				<button onClick={registerListener} disabled={isListening}>{!isListening ? 'Listen for something' : 'Listening...'}</button><br />
+
+				{isListening && <>
+
+					<textarea style={{ width: '100%', height: '60px', overflowY: 'auto' }} value={heardContent} disabled={true} />
+					<p>length: {heardContent?.length}</p>
+					<p>
+						<button onClick={tryToParseInvoice} disabled={isDecoding || heardContent?.length === 0 || !!parsedInvoice}>{isDecoding ? 'decoding ...' : 'decode'}</button>
+					</p>
+					<button onClick={tryToPayInvoice} disabled={!parsedInvoice}>pay {parsedInvoice?.satoshi ? `${parsedInvoice.satoshi} sats` : ''}</button>
+				</>}
 			</>}
 		</div>
 	);
