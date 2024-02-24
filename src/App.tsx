@@ -135,12 +135,32 @@ const App = () => {
         console.log(value)
         // if (isListening) {
           setHeardContent((prevHeardContent) => prevHeardContent + value);
+          tryToParseInvoice()
         // }
       });
+      console.log('listener registered')
     }
   }
 
-  const tryToParseInvoice = async () => {
+  const tryToParseInvoice =  () => { 
+
+    const invoice = (() => {
+      try {
+        const invoice = new ALbyLightningTools.Invoice({ pr: heardContent });
+        return invoice
+        } catch (e) {
+          // don't care about the error
+          console.log('silent error')
+          return undefined
+        }
+    })()
+   
+    console.log('invoice amount: ', invoice?.satoshi)
+  }
+
+
+
+  const tryToPayInvoice = async () => {
 
     // @ts-ignore
     const paymentAttempt = await window.webln.sendPayment(heardContent);
@@ -185,7 +205,8 @@ const App = () => {
       <p>length: {heardContent?.length}</p>
      <hr />
      {generatedInvoice === heardContent ? 'MATCH' : 'NOT THE SAME'}
-     <button onClick={tryToParseInvoice}>try to pay</button>
+     <button onClick={tryToParseInvoice}>try to decode</button><br/>
+     <button onClick={tryToPayInvoice}>try to pay</button>
     </div>
   );
 }
