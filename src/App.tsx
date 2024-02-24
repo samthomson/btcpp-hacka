@@ -18,6 +18,7 @@ const App = () => {
 
   const [generatedInvoice, setGeneratedInvoice] = React.useState<string>()
 
+  const [broadcastMode, setBroadcastMode] = React.useState<'single' | 'batch'>('single');
   const [heardContent, setHeardContent] = React.useState<string>('')
   const [isListening, setIsListening] = React.useState<boolean>(false)
 
@@ -106,18 +107,31 @@ const App = () => {
           const invoiceString = invoice.paymentRequest
           setGeneratedInvoice(invoiceString)
 
-          const chunks = splitStringIntoVariableChunks(invoiceString, 3, 24)
 
-          for (let i = 0 ; i < chunks.length; i++) {
+
+          if (broadcastMode === 'single') {
             // @ts-ignore
             quiet.transmit({
               clampFrame: false,
               // clampFrame: true,
-              // payload: invoiceString,
-              payload: chunks[i],
+              payload: invoiceString,
             });
-            await new Promise(resolve => setTimeout(resolve, 300))
+          } else if (broadcastMode === 'batch') {
+            const chunks = splitStringIntoVariableChunks(invoiceString, 3, 24)
+
+            for (let i = 0 ; i < chunks.length; i++) {
+              // @ts-ignore
+              quiet.transmit({
+                clampFrame: false,
+                // clampFrame: true,
+                // payload: invoiceString,
+                payload: chunks[i],
+              });
+              await new Promise(resolve => setTimeout(resolve, 300))
+            }
           }
+
+          
         }
 
       })();
@@ -173,7 +187,7 @@ const App = () => {
      <h2>Lightning / thunder</h2>
 
      <h3>Convert Lightning (&#9889;) &rarr; thunder (&#128227;&#127785;)</h3>
-     <p>
+     <div>
       receive to:&nbsp;&nbsp;&nbsp;&nbsp;
      <input
           type="text"
@@ -189,11 +203,35 @@ const App = () => {
           onChange={(e) => setAmount(Number(e.target.value))}
         /><br/><br/>
 
+        <p>
+          Broadcast mode:
+        <label>
+          <input
+            type="radio"
+            value="single"
+            checked={broadcastMode === 'single'}
+            onChange={(e) => setBroadcastMode('single')}
+          />
+          Single
+        </label>
+        &nbsp;&nbsp;
+        <label>
+          <input
+            type="radio"
+            value="batch"
+            checked={broadcastMode === 'batch'}
+            onChange={(e) => setBroadcastMode('batch')}
+          />
+          Batch
+        </label>
+        </p>
+
       <button onClick={makeInvoice}>make ⚡</button>
-      </p>
+      </div>
       <p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>{generatedInvoice}</p>
       <p>length: {generatedInvoice?.length}</p>
      <hr/>
+
 
      <h3>Convert Thunder (&#127785;👂) to Lightning (&#9889;)</h3>
      {/* <button onClick={toggleListening}>{String(isListening)}</button><br/> */}
@@ -203,8 +241,6 @@ const App = () => {
      <p style={{ wordWrap: 'break-word', maxWidth: '100%' }}>
      {heardContent}</p>
       <p>length: {heardContent?.length}</p>
-     <hr />
-     {generatedInvoice === heardContent ? 'MATCH' : 'NOT THE SAME'}
      <button onClick={tryToParseInvoice}>try to decode</button><br/>
      <button onClick={tryToPayInvoice}>try to pay</button>
     </div>
