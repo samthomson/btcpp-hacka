@@ -16,7 +16,7 @@ const App = () => {
 	const [uiIsBroadcastMode, setUIIsBroadcastMode] = React.useState(true)
 
 	const [amount, setAmount] = React.useState<number>(0);
-	const [receiveAddress, setReceiveAddress] = React.useState<string>(''); //sam@lawallet.ar
+	const [receiveAddress, setReceiveAddress] = React.useState<string>('');
 
 	const [generatedInvoice, setGeneratedInvoice] = React.useState<string>()
 
